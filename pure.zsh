@@ -106,26 +106,37 @@ prompt_pure_preexec() {
 prompt_pure_preprompt_render() {
 	setopt localoptions noshwordsplit
 
-	# Set color for git branch/dirty status, change color if dirty checking has
-	# been delayed.
-	local git_color=green
-	[[ -n ${prompt_pure_git_last_dirty_check_timestamp+x} ]] && git_color=red
-
 	# Initialize the preprompt array.
 	local -a preprompt_parts
 
 	# Set the path.
 	preprompt_parts+=('%F{blue}%~%f')
 
+	# Set color for git branch/dirty status, change color if dirty checking has
+	# been delayed.
+	local git_color=green
+	[[ -n ${prompt_pure_git_last_dirty_check_timestamp+x} ]] && git_color=red
+
 	# Add git branch and dirty status info.
 	typeset -gA prompt_pure_vcs_info
+	local -a git_pre_prompt_parts
+	if [[ -n $prompt_pure_vcs_info[action] ]]; then
+    git_pre_prompt_parts+=('%F{red}(${prompt_pure_vcs_info[action]})')
+  fi
 	if [[ -n $prompt_pure_vcs_info[branch] ]]; then
-		preprompt_parts+=("%F{$git_color}"'git:${prompt_pure_vcs_info[branch]}${prompt_pure_git_dirty}%f')
-	fi
+    git_pre_prompt_parts+=("%F{$git_color}"'${prompt_pure_vcs_info[branch]}')
+  fi
+	if [[ -n $prompt_pure_git_dirty ]]; then
+    git_pre_prompt_parts+=('%F{red}${prompt_pure_git_dirty}')
+  fi
 	# Git pull/push arrows.
 	if [[ -n $prompt_pure_git_arrows ]]; then
-		preprompt_parts+=('%F{cyan}${prompt_pure_git_arrows}%f')
+    git_pre_prompt_parts+=('%F{cyan}(${prompt_pure_git_arrows})%f')
 	fi
+
+	if [[ -n $git_pre_prompt_parts ]]; then
+    preprompt_parts+=("%F{$git_color}"'git:{'"${git_pre_prompt_parts}""%F{$git_color}"'}%f')
+  fi
 
 	# Username and machine, if applicable.
 	[[ -n $prompt_pure_state[username] ]] && preprompt_parts+=('${prompt_pure_state[username]}')
@@ -233,11 +244,13 @@ prompt_pure_async_vcs_info() {
 	# to be used or configured as the user pleases.
 	zstyle ':vcs_info:*' enable git
 	zstyle ':vcs_info:*' use-simple true
+	
 	# only export two msg variables from vcs_info
-	zstyle ':vcs_info:*' max-exports 2
+	zstyle ':vcs_info:*' max-exports 3
+	#
 	# export branch (%b) and git toplevel (%R)
 	zstyle ':vcs_info:git*' formats '%b' '%R'
-	zstyle ':vcs_info:git*' actionformats '%b|%a' '%R'
+  zstyle ':vcs_info:git*' actionformats "%b" '%R' "%a"
 
 	vcs_info
 
@@ -245,6 +258,7 @@ prompt_pure_async_vcs_info() {
 	info[pwd]=$PWD
 	info[top]=$vcs_info_msg_1_
 	info[branch]=$vcs_info_msg_0_
+	info[action]=$vcs_info_msg_2_
 
 	print -r - ${(@kvq)info}
 }
@@ -335,6 +349,7 @@ prompt_pure_async_tasks() {
 		unset prompt_pure_git_last_dirty_check_timestamp
 		unset prompt_pure_git_arrows
 		unset prompt_pure_git_fetch_pattern
+		prompt_pure_vcs_info[action]=
 		prompt_pure_vcs_info[branch]=
 		prompt_pure_vcs_info[top]=
 	fi
@@ -371,7 +386,7 @@ prompt_pure_async_refresh() {
 	if (( time_since_last_dirty_check > ${PURE_GIT_DELAY_DIRTY_CHECK:-1800} )); then
 		unset prompt_pure_git_last_dirty_check_timestamp
 		# check check if there is anything to pull
-		async_job "prompt_pure" prompt_pure_async_git_dirty ${PURE_GIT_UNTRACKED_DIRTY:-1}
+		async_job "prompt_pure" prompt_pure_async_git_dirty ${PURE_GIT_UNTRACKED_DIRTY:1}
 	fi
 }
 
@@ -429,6 +444,7 @@ prompt_pure_async_callback() {
 
 			# always update branch and toplevel
 			prompt_pure_vcs_info[branch]=$info[branch]
+			prompt_pure_vcs_info[action]=$info[action]
 			prompt_pure_vcs_info[top]=$info[top]
 
 			do_render=1
