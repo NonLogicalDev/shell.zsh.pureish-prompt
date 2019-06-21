@@ -209,11 +209,11 @@ prompt_pure_preprompt_render() {
 
 	# Set the path.
 	#preprompt_parts+=('%F{blue}%~%f')
-  preprompt_parts+=('%F{blue}$(prompt_pure_shrink_path -f)%f')
+  preprompt_parts+=('%F{yellow}(%F{blue}$(prompt_pure_shrink_path -f)%F{yellow})%f')
 
 	# Set color for git branch/dirty status, change color if dirty checking has
 	# been delayed.
-	local git_color=green
+	local git_color=yellow
 	[[ -n ${prompt_pure_git_last_dirty_check_timestamp+x} ]] && git_color=red
 
 	# Add git branch and dirty status info.
@@ -223,24 +223,30 @@ prompt_pure_preprompt_render() {
     git_pre_prompt_parts+=('%F{red}(${prompt_pure_vcs_info[action]})')
   fi
 	if [[ -n $prompt_pure_vcs_info[branch] ]]; then
-    git_pre_prompt_parts+=('%F{blue}${prompt_pure_vcs_info[branch]}')
-  fi
-	if [[ -n $prompt_pure_git_dirty ]]; then
-    git_pre_prompt_parts+=('%F{red}${prompt_pure_git_dirty}')
+    git_pre_prompt_parts+=('%f[')
+    git_pre_prompt_parts+=('%F{green}${prompt_pure_vcs_info[branch]}')
+    git_pre_prompt_parts+=('%F{blue}${prompt_pure_git_dirty}')
+    git_pre_prompt_parts+=('%f]')
+  elif [[ -n $prompt_pure_git_dirty ]]; then
+    git_pre_prompt_parts+=('%f[')
+    git_pre_prompt_parts+=('%F{blue}${prompt_pure_git_dirty}')
+    git_pre_prompt_parts+=('%f]')
   fi
 	# Git pull/push arrows.
 	if [[ -n $prompt_pure_git_arrows ]]; then
-    git_pre_prompt_parts+=('%F{cyan}(${prompt_pure_git_arrows})%f')
+    git_pre_prompt_parts+=('%F{magenta}(${prompt_pure_git_arrows})%f')
 	fi
 
 	if [[ -n $git_pre_prompt_parts ]]; then
-    preprompt_parts+=("%F{$git_color}"'git:{'"${git_pre_prompt_parts}""%F{$git_color}"'}%f')
+    preprompt_parts+=('%f{'"%F{$git_color}git%f:${(j..)git_pre_prompt_parts}""%F{$git_color}"'%f}')
   fi
 
 	# Username and machine, if applicable.
 	[[ -n $prompt_pure_state[username] ]] && preprompt_parts+=('${prompt_pure_state[username]}')
 	# Execution time.
 	[[ -n $prompt_pure_cmd_exec_time ]] && preprompt_parts+=('%F{yellow}${prompt_pure_cmd_exec_time}%f')
+
+	preprompt_parts+=('%f[$(date +"%T %D")]%f')
 
 	local cleaned_ps1=$PROMPT
 	local -H MATCH MBEGIN MEND
@@ -254,9 +260,8 @@ prompt_pure_preprompt_render() {
 	# Construct the new prompt with a clean preprompt.
 	local -ah ps1
 	ps1=(
-    "%(?::%F{9}|\$?|%f)"
-		"[ ${(j. | .)preprompt_parts} ]"  # Join parts, space separated.
-    " | ($(date +%s))"
+    "%(?::%F{9}[\$?] %f)"
+		"${(j. * .)preprompt_parts}"  # Join parts, space separated.
 		$prompt_newline           # Separate preprompt and prompt.
 		$cleaned_ps1
 	)
@@ -559,7 +564,7 @@ prompt_pure_async_callback() {
 			if (( code == 0 )); then
 				unset prompt_pure_git_dirty
 			else
-        typeset -g prompt_pure_git_dirty="(*)"
+        typeset -g prompt_pure_git_dirty="(@)"
 			fi
 
 			[[ $prev_dirty != $prompt_pure_git_dirty ]] && do_render=1
