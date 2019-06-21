@@ -646,6 +646,7 @@ prompt_pure_shrink_path () {
   typeset -i lastfull=0
   typeset -i short=0
   typeset -i tilde=0
+  typeset -i maxchar=0
   typeset -i named=0
 
   if zstyle -t ':prompt:shrink_path' fish; then
@@ -660,6 +661,8 @@ prompt_pure_shrink_path () {
   zstyle -t ':prompt:shrink_path' last && lastfull=1
   zstyle -t ':prompt:shrink_path' short && short=1
   zstyle -t ':prompt:shrink_path' tilde && tilde=1
+
+  zstyle -t ':prompt:shrink_path' maxchar || maxchar=15
 
   while [[ $1 == -* ]]; do
     case $1 in
@@ -715,7 +718,19 @@ prompt_pure_shrink_path () {
 
     for dir in $tree; {
       if (( lastfull && $#tree == 1 )) {
-        result+="/$tree"
+        local rt="$tree"
+
+        local rM=$(($#rt/2))
+        local rO=0
+        local rSep=""
+
+        if [[ $rM -gt $maxchar ]]; then
+          rO=$(($rM - $maxchar))
+          local rSep="|...|"
+        fi
+
+        local rtS="${rt[1,$(($rM - $rO))]}" rtE="${rt[$(($rM + 1 + $rO)),-1]}"
+        result+="/$rtS$rSep$rtE"
         break
       }
       expn=(a b)
