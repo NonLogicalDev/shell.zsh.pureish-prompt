@@ -184,31 +184,31 @@ prompt_pure_preprompt_render() {
 
   # Add git branch and dirty status info.
   typeset -gA prompt_pure_vcs_info
-  local -a git_pre_prompt_parts
+  local -a vcs_pre_prompt_parts
 
   if [[ -n $prompt_pure_git_stash ]]; then
-    git_pre_prompt_parts+=('%F{blue}${prompt_pure_git_stash}%f:')
+    vcs_pre_prompt_parts+=('%F{blue}${prompt_pure_git_stash}%f:')
   fi
 
   if [[ -n $prompt_pure_vcs_info[branch] ]]; then
-    git_pre_prompt_parts+=('%F{green}${prompt_pure_vcs_info[branch]}')
+    vcs_pre_prompt_parts+=('%F{green}${prompt_pure_vcs_info[branch]}')
   fi
 
   if [[ -n $prompt_pure_git_dirty ]]; then
-    git_pre_prompt_parts+=('%f:%F{blue}${prompt_pure_git_dirty}')
+    vcs_pre_prompt_parts+=('%f:%F{blue}${prompt_pure_git_dirty}')
   fi
 
   # Git pull/push arrows.
   if [[ -n $prompt_pure_git_arrows ]]; then
-    git_pre_prompt_parts+=('%f:%F{magenta}(${prompt_pure_git_arrows})%f')
+    vcs_pre_prompt_parts+=('%f:%F{magenta}(${prompt_pure_git_arrows})%f')
   fi
   # Git Action.
   if [[ -n $prompt_pure_vcs_info[action] ]]; then
-    git_pre_prompt_parts+=('%f:%F{red}(${prompt_pure_vcs_info[action]})')
+    vcs_pre_prompt_parts+=('%f:%F{red}(${prompt_pure_vcs_info[action]})')
   fi
 
-  if [[ -n $git_pre_prompt_parts ]]; then
-    preprompt_parts+=('%f{'"%F{$git_color}git%f:${(j..)git_pre_prompt_parts}""%F{$git_color}"'%f}')
+  if [[ -n $vcs_pre_prompt_parts ]]; then
+    preprompt_parts+=('%f{'"%F{$git_color}${prompt_pure_vcs_info[vcs]}%f:${(j..)vcs_pre_prompt_parts}""%F{$git_color}"'%f}')
   fi
 
   # Username and machine, if applicable.
@@ -378,6 +378,7 @@ prompt_pure_async_callback() {
       [[ -n $info[top] ]] && [[ -z $prompt_pure_vcs_info[top] ]] && prompt_pure_async_refresh
 
       # always update branch and toplevel
+      prompt_pure_vcs_info[vcs]=$info[vcs]
       prompt_pure_vcs_info[branch]=$info[branch]
       prompt_pure_vcs_info[action]=$info[action]
       prompt_pure_vcs_info[top]=$info[top]
@@ -546,23 +547,24 @@ prompt_pure_async_vcs_info() {
 
   # configure vcs_info inside async task, this frees up vcs_info
   # to be used or configured as the user pleases.
-  zstyle ':vcs_info:*' enable git
+  zstyle ':vcs_info:*' enable git svn hg
   zstyle ':vcs_info:*' use-simple true
   
   # only export two msg variables from vcs_info
-  zstyle ':vcs_info:*' max-exports 3
+  zstyle ':vcs_info:*' max-exports 4
   #
   # export branch (%b) and git toplevel (%R)
-  zstyle ':vcs_info:git*' formats '%b' '%R'
-  zstyle ':vcs_info:git*' actionformats "%b" '%R' "%a"
+  zstyle ':vcs_info:*' formats '%s' '%b' '%R'
+  zstyle ':vcs_info:*' actionformats '%s' '%b' '%R' "%a"
 
   vcs_info
 
   local -A info
   info[pwd]=$PWD
-  info[top]=$vcs_info_msg_1_
-  info[branch]=$vcs_info_msg_0_
-  info[action]=$vcs_info_msg_2_
+  info[branch]=$vcs_info_msg_1_
+  info[top]=$vcs_info_msg_2_
+  info[action]=$vcs_info_msg_3_
+  info[vcs]=$vcs_info_msg_0_
 
   print -r - ${(@kvq)info}
 }
