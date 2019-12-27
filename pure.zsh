@@ -640,6 +640,7 @@ prompt_pure_async_git_arrows() {
 ################################################################################
 
 # src: https://github.com/robbyrussell/oh-my-zsh/tree/master/plugins/shrink-path
+# Modified sligtly to truncate long directory names with an elipsis in the middle.
 prompt_pure_shrink_path () {
 	setopt localoptions
 	setopt rc_quotes null_glob
@@ -725,6 +726,7 @@ prompt_pure_shrink_path () {
 				local rO=0
 				local rSep=""
 
+				# Add an elipsis in the middle if the path is getting too big.
 				if [[ $rM -gt $maxchar ]]; then
 					rO=$(($rM - $maxchar))
 					local rSep="|...|"
