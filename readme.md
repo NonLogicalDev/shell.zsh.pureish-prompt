@@ -7,9 +7,25 @@
 
 ## Overview
 
-Most prompts are cluttered, ugly and slow. I wanted something visually pleasing that stayed out of my way.
+> Mad Props to: [Sindre Sorhus](https://github.com/sindresorhus), for an amazing base for this enhancement.
 
-### Why?
+I like my prompts clean, useful and fast. I did really like the aesthetic of the pure prompt, but it was a little too barebones for me.
+
+This prompt has a few improvements over pure, for the info junkie:
+
+- Cleaned up / Organized functions in `pure.zsh`.
+- Improved the git/hg statuses to my liking.
+- Visually separated sections, for easier visual parsing at a glance.
+- Long directories now get truncated in the middle with an elipsis.
+- Added timestamps for all commands.
+    - (For the crazy people that leave their sessions running for days on end.)
+    - (And make you painfully aware of how late it is right now probably.)
+- No unicode characters in the prompt, aside from the prompt character.
+    - (To keep even most barebones terminals happy. Looking at you ItelliJ (X_X)... )
+- If non-zero, the error code of the last command is displayed.
+    - (Makes it super nice to test shell commands / know exactly what happened in case of an error.)
+
+<!-- ### Why?
 
 - Comes with the perfect prompt character.
   Author went through the whole Unicode range to find it.
@@ -20,7 +36,7 @@ Most prompts are cluttered, ugly and slow. I wanted something visually pleasing 
 - Username and host only displayed when in an SSH session.
 - Shows the current path in the title and the [current folder & command](screenshot-title-cmd.png) when a process is running.
 - Support VI-mode indication by reverse prompt symbol (Zsh 5.3+).
-- Makes an excellent starting point for your own custom prompt.
+- Makes an excellent starting point for your own custom prompt. -->
 
 
 ## Install
@@ -202,9 +218,11 @@ See [FAQ Archive](https://github.com/sindresorhus/pure/wiki/FAQ-Archive) for pre
 
 ## Team
 
-[![Sindre Sorhus](https://github.com/sindresorhus.png?size=100)](http://sindresorhus.com) | [![Mathias Fredriksson](https://github.com/mafredri.png?size=100)](https://github.com/mafredri)
----|---
-[Sindre Sorhus](https://github.com/sindresorhus) | [Mathias Fredriksson](https://github.com/mafredri)
+| Contributors | |
+| :-- | :-- |
+| ![NonLogical](https://github.com/nonlogicaldev.png?size=100) | NonLogical |
+| [![Sindre Sorhus](https://github.com/sindresorhus.png?size=100)](http://sindresorhus.com) | [Sindre Sorhus](https://github.com/sindresorhus) |
+| [![Mathias Fredriksson](https://github.com/mafredri.png?size=100)](https://github.com/mafredri) | [Mathias Fredriksson](https://github.com/mafredri) |
 
 
 ## License
