@@ -1,9 +1,8 @@
-# Pure
+# Pure:Ish
 
-> Pretty, minimal and fast ZSH prompt
+> Sorta-pretty, kinda-minimal, but definitely fast and useful ZSH prompt.
 
 <img src="screenshot.png" width="864">
-
 
 ## Overview
 
@@ -88,7 +87,6 @@ PURE_CMD_MAX_EXEC_TIME=10
 prompt pure
 ```
 
-
 ## Tips
 
 In the screenshot you see Pure running in [Hyper](https://hyper.is) with the [hyper-snazzy](https://github.com/sindresorhus/hyper-snazzy) theme and Menlo font.
@@ -104,32 +102,13 @@ There are currently no FAQs.
 
 See [FAQ Archive](https://github.com/sindresorhus/pure/wiki/FAQ-Archive) for previous FAQs.
 
-## Ports
-
-- **ZSH**
-	- [therealklanni/purity](https://github.com/therealklanni/purity) - More compact current working directory, important details on the main prompt line, and extra Git indicators.
- 	- [intelfx/pure](https://github.com/intelfx/pure) - Solarized-friendly colors, highly verbose, and fully async Git integration.
-	- [dfurnes/purer](https://github.com/dfurnes/purer) - Compact single-line prompt with built-in Vim-mode indicator.
-	- [chabou/pure-now](https://github.com/chabou/pure-now) - Fork with [Now](https://zeit.co/now) support
-- **Bash**
-	- [sapegin/dotfiles](https://github.com/sapegin/dotfiles) - [Prompt](https://github.com/sapegin/dotfiles/blob/dd063f9c30de7d2234e8accdb5272a5cc0a3388b/includes/bash_prompt.bash) and [color theme](https://github.com/sapegin/dotfiles/tree/master/color) for Terminal.app.
-- **Fish**
-	- [brandonweiss/pure.fish](https://github.com/brandonweiss/pure.fish) - Pure-inspired prompt for Fish. Not intended to have feature parity.
-	- [rafaelrinaldi/pure](https://github.com/rafaelrinaldi/pure) - Support for bare Fish and various framework ([Oh-My-Fish](https://github.com//oh-my-fish/oh-my-fish), [Fisherman](https://github.com//fisherman/fisherman), and [Wahoo](https://github.com//bucaran/wahoo)).
-- **Rust**
-	- [xcambar/purs](https://github.com/xcambar/purs) - Pure-inspired prompt in Rust.
-- **Go**
-	- [talal/mimir](https://github.com/talal/mimir) - Pure-inspired prompt in Go with Kubernetes and OpenStack cloud support. Not intended to have feature parity.
-- **PowerShell**
-	- [nickcox/pure-pwsh](https://github.com/nickcox/pure-pwsh/) - PowerShell/PS Core implementation of the Pure prompt.
-
 ## Team
 
 | Contributors | |
 | :-- | :-- |
-| ![NonLogical](https://github.com/nonlogicaldev.png?size=100) | NonLogical |
-| [![Sindre Sorhus](https://github.com/sindresorhus.png?size=100)](http://sindresorhus.com) | [Sindre Sorhus](https://github.com/sindresorhus) |
-| [![Mathias Fredriksson](https://github.com/mafredri.png?size=100)](https://github.com/mafredri) | [Mathias Fredriksson](https://github.com/mafredri) |
+| ![NonLogical](https://github.com/nonlogicaldev.png?size=100) | NonLogical (The Modder) |
+| [![Sindre Sorhus](https://github.com/sindresorhus.png?size=100)](http://sindresorhus.com) | [Sindre Sorhus](https://github.com/sindresorhus) (The Original Author) |
+| [![Mathias Fredriksson](https://github.com/mafredri.png?size=100)](https://github.com/mafredri) | [Mathias Fredriksson](https://github.com/mafredri) (The Original Author) |
 
 
 ## License
