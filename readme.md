@@ -41,49 +41,16 @@ This prompt has a few improvements over pure, for the info junkie:
 
 ## Install
 
-Can be installed with `npm` or manually. Requires Git 2.0.0+ and ZSH 5.2+. Older versions of ZSH are known to work, but they are **not** recommended.
+Requires Git 2.0.0+ and ZSH 5.2+. Older versions of ZSH are known to work, but they are **not** recommended.
 
-### npm
+### Install With Antibody [link](https://github.com/getantibody/antibody)
 
-```console
-$ npm install --global pure-prompt
-```
-
-That's it. Skip to [Getting started](#getting-started).
-
-### Manually
-
-1. Either…
-  - Clone this repo
-  - add it as a submodule, or
-  - just download [`pure.zsh`](pure.zsh) and [`async.zsh`](async.zsh)
-
-2. Symlink `pure.zsh` to somewhere in [`$fpath`](https://www.refining-linux.org/archives/46-ZSH-Gem-12-Autoloading-functions.html) with the name `prompt_pure_setup`.
-
-3. Symlink `async.zsh` in `$fpath` with the name `async`.
-
-#### Example
-
-```console
-$ ln -s "$PWD/pure.zsh" /usr/local/share/zsh/site-functions/prompt_pure_setup
-$ ln -s "$PWD/async.zsh" /usr/local/share/zsh/site-functions/async
-```
-*Run `echo $fpath` to see possible locations.*
-
-For a user-specific installation (which would not require escalated privileges), simply add a directory to `$fpath` for that user:
+Update your `.zshrc` file with the following two lines (order matters):
 
 ```sh
-# .zshenv or .zshrc
-fpath=( "$HOME/.zfunctions" $fpath )
+antibody bundle mafredri/zsh-async
+antibody bundle sindresorhus/pure
 ```
-
-Then install the theme there:
-
-```console
-$ ln -s "$PWD/pure.zsh" "$HOME/.zfunctions/prompt_pure_setup"
-$ ln -s "$PWD/async.zsh" "$HOME/.zfunctions/async"
-```
-
 
 ## Getting started
 
@@ -94,7 +61,6 @@ Initialize the prompt system (if not so already) and choose `pure`:
 autoload -U promptinit; promptinit
 prompt pure
 ```
-
 
 ## Options
 
@@ -131,65 +97,6 @@ The [Tomorrow Night Eighties](https://github.com/chriskempson/tomorrow-theme) th
 *Just make sure you have anti-aliasing enabled in your terminal.*
 
 To have commands colorized as seen in the screenshot, install [zsh-syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting).
-
-
-## Integration
-
-### [oh-my-zsh](https://github.com/robbyrussell/oh-my-zsh)
-
-1. Set `ZSH_THEME=""` in your `.zshrc` to disable oh-my-zsh themes.
-2. Follow the Pure [Install](#install) instructions.
-3. Do not enable the following (incompatible) plugins: `vi-mode`, `virtualenv`.
-
-**NOTE:** `oh-my-zsh` overrides the prompt so Pure must be activated *after* `source $ZSH/oh-my-zsh.sh`.
-
-### [prezto](https://github.com/sorin-ionescu/prezto)
-
-Pure is bundled with Prezto. No need to install it.
-
-Add `prompt pure` to your `~/.zpreztorc`.
-
-### [zim](https://github.com/Eriner/zim)
-
-Pure is bundled with Zim. No need to install it.
-
-Set `zprompt_theme='pure'` in `~/.zimrc`.
-
-### [antigen](https://github.com/zsh-users/antigen)
-
-Update your `.zshrc` file with the following two lines (order matters). Do not use the `antigen theme` function.
-
-```sh
-antigen bundle mafredri/zsh-async
-antigen bundle sindresorhus/pure
-```
-
-### [antibody](https://github.com/getantibody/antibody)
-
-Update your `.zshrc` file with the following two lines (order matters):
-
-```sh
-antibody bundle mafredri/zsh-async
-antibody bundle sindresorhus/pure
-```
-
-### [zplug](https://github.com/zplug/zplug)
-
-Update your `.zshrc` file with the following two lines:
-
-```sh
-zplug mafredri/zsh-async, from:github
-zplug sindresorhus/pure, use:pure.zsh, from:github, as:theme
-```
-
-### [zplugin](https://github.com/zdharma/zplugin)
-
-Update your `.zshrc` file with the following two lines (order matters):
-
-```sh
-zplugin ice pick"async.zsh" src"pure.zsh"
-zplugin light sindresorhus/pure
-```
 
 ## FAQ
 
