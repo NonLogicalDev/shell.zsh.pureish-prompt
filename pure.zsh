@@ -301,7 +301,7 @@ prompt_pure_preprompt_render() {
 	# Construct the new prompt with a clean preprompt.
 	local -ah ps1
 	ps1=(
-		"%(?::%F{9}[\$?] %f)"
+		"%(?::%F{red}[%?] %f)"
 		"${(j.$(pure_var_prompt_delimiter).)preprompt_parts}"  # Join parts, space separated.
 		$prompt_newline           # Separate preprompt and prompt.
 		$cleaned_ps1
