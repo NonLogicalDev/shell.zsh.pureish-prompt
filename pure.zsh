@@ -348,7 +348,7 @@ prompt_pure_preexec() {
 	# Disallow python virtualenv from updating the prompt, set it to 12 if
 	# untouched by the user to indicate that Pure modified it. Here we use
 	# magic number 12, same as in psvar.
-	# export VIRTUAL_ENV_DISABLE_PROMPT=${VIRTUAL_ENV_DISABLE_PROMPT:-12}
+	export VIRTUAL_ENV_DISABLE_PROMPT=${VIRTUAL_ENV_DISABLE_PROMPT:-12}
 }
 
 # Executed before each prompt.
@@ -366,16 +366,16 @@ prompt_pure_precmd() {
 	# Check if we should display the virtual env, we use a sufficiently high
 	# index of psvar (12) here to avoid collisions with user defined entries.
 	# psvar[12]=
-	# # Check if a conda environment is active and display it's name
-	# if [[ -n $CONDA_DEFAULT_ENV ]]; then
-	# 	psvar[12]="${CONDA_DEFAULT_ENV//[$'\t\r\n']}"
-	# fi
-	# # When VIRTUAL_ENV_DISABLE_PROMPT is empty, it was unset by the user and
-	# # Pure should take back control.
-	# if [[ -n $VIRTUAL_ENV ]] && [[ -z $VIRTUAL_ENV_DISABLE_PROMPT || $VIRTUAL_ENV_DISABLE_PROMPT = 12 ]]; then
-	# 	psvar[12]="${VIRTUAL_ENV:t}"
-	# 	export VIRTUAL_ENV_DISABLE_PROMPT=12
-	# fi
+	# Check if a conda environment is active and display it's name
+	if [[ -n $CONDA_DEFAULT_ENV ]]; then
+		psvar[12]="${CONDA_DEFAULT_ENV//[$'\t\r\n']}"
+	fi
+	# When VIRTUAL_ENV_DISABLE_PROMPT is empty, it was unset by the user and
+	# Pure should take back control.
+	if [[ -n $VIRTUAL_ENV ]] && [[ -z $VIRTUAL_ENV_DISABLE_PROMPT || $VIRTUAL_ENV_DISABLE_PROMPT = 12 ]]; then
+		psvar[12]="${VIRTUAL_ENV:t}"
+		export VIRTUAL_ENV_DISABLE_PROMPT=12
+	fi
 
 	# Make sure VIM prompt is reset.
 	prompt_pure_reset_prompt_symbol
