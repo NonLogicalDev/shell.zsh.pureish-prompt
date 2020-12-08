@@ -57,7 +57,9 @@ pure_var_git_delay_dirty_check () {
 # SETUP:
 ################################################################################
 
-prompt_pure_setup() {
+prompt_pure_init_dependencies() {
+	setopt localoptions noshwordsplit
+
 	# Prevent percentage showing up if output doesn't end with a newline.
 	export PROMPT_EOL_MARK=$(pure_var_eol_mark)
 
@@ -83,6 +85,12 @@ prompt_pure_setup() {
 	# The add-zle-hook-widget function is not guaranteed
 	# to be available, it was added in Zsh 5.3.
 	autoload -Uz +X add-zle-hook-widget 2>/dev/null
+}
+
+prompt_pure_setup() {
+	setopt localoptions noshwordsplit
+
+	prompt_pure_init_dependencies
 
 	# Add command lifecycle hooks.
 	add-zsh-hook precmd prompt_pure_precmd
@@ -123,7 +131,7 @@ prompt_pure_setup() {
 		prompt 	  '%F{242}>%f '
 	)
 	# Combine the parts with conditional logic. First the `:+` operator is
-	# used to replace `compare` either with `main` or an ampty string. Then
+	# used to replace `compare` either with `main` or an empty string. Then
 	# the `:-` operator is used so that if `compare` becomes an empty
 	# string, it is replaced with `secondary`.
 	local ps4_symbols='${${'${ps4_parts[compare]}':+"'${ps4_parts[main]}'"}:-"'${ps4_parts[secondary]}'"}'
@@ -193,17 +201,21 @@ prompt_pure_state_setup() {
 }
 
 prompt_pure_reset_prompt_symbol() {
+	setopt localoptions noshwordsplit
+
 	prompt_pure_state[prompt]=$(pure_var_prompt_symbol)
 }
 
 prompt_pure_reset_vim_prompt_widget() {
 	setopt localoptions noshwordsplit
+
 	prompt_pure_reset_prompt_symbol
 	zle && zle .reset-prompt
 }
 
 prompt_pure_update_vim_prompt_widget() {
 	setopt localoptions noshwordsplit
+
 	if [[ $KEYMAP == "vicmd" ]]; then
 		prompt_pure_state[prompt]=$(pure_var_prompt_symbol_alt)
 	else #(main|viins) etc.
@@ -214,6 +226,7 @@ prompt_pure_update_vim_prompt_widget() {
 
 prompt_pure_vcs_prompt_render() {
 	setopt localoptions noshwordsplit
+
 	typeset -gA prompt_pure_vcs_info
 	local -a vcs_prompt_parts
 	local delim=$(pure_var_vcs_prompt_delimiter)
@@ -253,6 +266,14 @@ prompt_pure_vcs_prompt_render() {
 		vcs_prompt_parts+=('%F{red}(${prompt_pure_vcs_info[action]})%f')
 	fi
 
+	if [[ -n ${prompt_pure_vcs_info[stg_top]} ]]; then
+		stg_info='${prompt_pure_vcs_info[stg_top]}'
+		if [[ -n ${prompt_pure_vcs_info[stg_height]} ]]; then
+			stg_info+='#${prompt_pure_vcs_info[stg_height]}'
+		fi
+		vcs_prompt_parts+=("%f(${stg_info}})%f")
+	fi
+
 	# Assembling and adding the VCS Prompt.
 	if [[ -n $vcs_prompt_parts ]]; then
 		echo '%f{'"${(j($(pure_var_vcs_prompt_delimiter)))vcs_prompt_parts}"'%f}'
@@ -290,13 +311,11 @@ prompt_pure_preprompt_render() {
 	preprompt_parts+=('%f[$(date +"%T %D")]%f')
 
 	local cleaned_ps1=$PROMPT
-	local -H MATCH MBEGIN MEND
 	if [[ $PROMPT = *$prompt_newline* ]]; then
 		# Remove everything from the prompt until the newline. This
 		# removes the preprompt and only the original PROMPT remains.
 		cleaned_ps1=${PROMPT##*${prompt_newline}}
 	fi
-	unset MATCH MBEGIN MEND
 
 	# Construct the new prompt with a clean preprompt.
 	local -ah ps1
@@ -326,6 +345,7 @@ prompt_pure_preprompt_render() {
 
 prompt_pure_check_git_arrows() {
 	setopt localoptions noshwordsplit
+
 	local arrows left=${1:-0} right=${2:-0}
 
 	(( right > 0 )) && arrows+=${PURE_GIT_DOWN_ARROW:-+r}
@@ -340,6 +360,8 @@ prompt_pure_check_git_arrows() {
 
 # Executed just after a command has been read and is about to be executed.
 prompt_pure_preexec() {
+	setopt localoptions noshwordsplit
+
 	typeset -g prompt_pure_cmd_timestamp=$EPOCHSECONDS
 
 	# shows the current dir and executed command in the title while a process is active
@@ -353,6 +375,8 @@ prompt_pure_preexec() {
 
 # Executed before each prompt.
 prompt_pure_precmd() {
+	setopt localoptions noshwordsplit
+
 	# check exec time and store it in a variable
 	prompt_pure_check_cmd_exec_time
 	unset prompt_pure_cmd_timestamp
@@ -389,6 +413,7 @@ prompt_pure_precmd() {
 
 prompt_pure_async_callback() {
 	setopt localoptions noshwordsplit
+
 	local job=$1 code=$2 output=$3 exec_time=$4 next_pending=$6
 	local do_render=0
 
@@ -406,7 +431,6 @@ prompt_pure_async_callback() {
 
 			# parse output (z) and unquote as array (Q@)
 			info=("${(Q@)${(z)output}}")
-			local -H MATCH MBEGIN MEND
 			if [[ $info[pwd] != $PWD ]]; then
 				# The path has changed since the check started, abort.
 				return
@@ -422,7 +446,6 @@ prompt_pure_async_callback() {
 				# store $PWD to detect if we (maybe) left the git path
 				prompt_pure_vcs_info[pwd]=$PWD
 			fi
-			unset MATCH MBEGIN MEND
 
 			# update has a git toplevel set which means we just entered a new
 			# git directory, run the async refresh tasks
@@ -433,6 +456,8 @@ prompt_pure_async_callback() {
 			prompt_pure_vcs_info[branch]=$info[branch]
 			prompt_pure_vcs_info[action]=$info[action]
 			prompt_pure_vcs_info[top]=$info[top]
+			prompt_pure_vcs_info[stg_top]=$info[stg_top]
+			prompt_pure_vcs_info[stg_height]=$info[stg_height]
 
 			do_render=1
 			;;
@@ -522,7 +547,6 @@ prompt_pure_async_tasks() {
 
 	typeset -gA prompt_pure_vcs_info
 
-	local -H MATCH MBEGIN MEND
 	if [[ $PWD != ${prompt_pure_vcs_info[pwd]}* ]]; then
 		# stop any running async jobs
 		async_flush_jobs "prompt_pure"
@@ -531,6 +555,7 @@ prompt_pure_async_tasks() {
 		prompt_pure_vcs_info[action]=
 		prompt_pure_vcs_info[branch]=
 		prompt_pure_vcs_info[top]=
+		prompt_pure_vcs_info[stg_top]=
 
 		prompt_pure_vcs_info[stash]=
 		prompt_pure_vcs_info[dirty]=
@@ -539,7 +564,6 @@ prompt_pure_async_tasks() {
 		unset prompt_pure_git_last_dirty_check_timestamp
 		unset prompt_pure_git_fetch_pattern
 	fi
-	unset MATCH MBEGIN MEND
 
 	async_job "prompt_pure" prompt_pure_async_vcs_info
 
@@ -582,6 +606,7 @@ prompt_pure_async_vcs_info() {
 
 	vcs_info
 
+
 	local -A info
 	info[pwd]=$PWD
 	info[branch]=$vcs_info_msg_1_
@@ -589,12 +614,20 @@ prompt_pure_async_vcs_info() {
 	info[action]=$vcs_info_msg_3_
 	info[vcs]=$vcs_info_msg_0_
 
+	if (( $+commands[stg] )); then
+		vcs_stg_top=$(stg top)
+		vcs_stg_height=$(stg series -A | wc -l | tr -d ' ')
+	fi
+	info[stg_top]=$vcs_stg_top
+	info[stg_height]=$vcs_stg_height
+
 	print -r - ${(@kvq)info}
 }
 
 prompt_pure_async_git_dirty() {
-	# fastest possible way to check if repo is dirty
 	setopt localoptions noshwordsplit
+
+	# fastest possible way to check if repo is dirty
 	local untracked_dirty=$1
 	if [[ $untracked_dirty = 0 ]]; then
 		command git diff --no-ext-diff --quiet --exit-code
@@ -606,12 +639,14 @@ prompt_pure_async_git_dirty() {
 
 prompt_pure_async_git_stash() {
 	setopt localoptions noshwordsplit
+
 	test -f "$(git rev-parse --show-toplevel)/.git/refs/stash"
 	return $?
 }
 
 prompt_pure_async_git_arrows() {
 	setopt localoptions noshwordsplit
+
 	command git rev-list --left-right --count HEAD...@'{u}'
 }
 
@@ -621,8 +656,7 @@ prompt_pure_async_git_arrows() {
 # src: https://github.com/robbyrussell/oh-my-zsh/tree/master/plugins/shrink-path
 # Modified sligtly to truncate long directory names with an elipsis in the middle.
 prompt_pure_shrink_path () {
-	setopt localoptions
-	setopt rc_quotes null_glob
+	setopt localoptions noshwordsplit rc_quotes null_glob
 
 	typeset -i lastfull=0
 	typeset -i short=0
@@ -736,6 +770,8 @@ prompt_pure_shrink_path () {
 # 165392 => 1d 21h 56m 32s
 # https://github.com/sindresorhus/pretty-time-zsh
 prompt_pure_human_time_to_var() {
+	setopt localoptions noshwordsplit
+
 	local human total_seconds=$1 var=$2
 	local days=$(( total_seconds / 60 / 60 / 24 ))
 	local hours=$(( total_seconds / 60 / 60 % 24 ))
@@ -752,6 +788,8 @@ prompt_pure_human_time_to_var() {
 
 # stores (into prompt_pure_cmd_exec_time) the exec time of the last command if set threshold was exceeded
 prompt_pure_check_cmd_exec_time() {
+	setopt localoptions noshwordsplit
+
 	integer elapsed
 	(( elapsed = EPOCHSECONDS - ${prompt_pure_cmd_timestamp:-$EPOCHSECONDS} ))
 	typeset -g prompt_pure_cmd_exec_time=
@@ -787,6 +825,23 @@ prompt_pure_set_title() {
 	# when XTRACE is enabled.
 	print -n $opts $'\e]0;'${hostname}${2}$'\a'
 }
+
+# REFERENCE:
+################################################################################
+
+# Moving to ZLE Async:
+#https://github.com/sorin-ionescu/prezto/blob/e07027821b1d02179f8f60c0f0fc5dafcc653ac2/modules/prompt/functions/prompt_sorin_setup
+
+# Serialize/Parse Associative arrays
+__reference_parse_arrays() {
+	# Serialize:
+	local -A info
+	info[pwd]=$PWD
+	print -r - ${(@kvq)info}
+
+	# Deserialize:
+}
+
 
 # RUN:
 ################################################################################
