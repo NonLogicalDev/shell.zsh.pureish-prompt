@@ -58,8 +58,6 @@ pure_var_git_delay_dirty_check () {
 ################################################################################
 
 prompt_pure_init_dependencies() {
-	setopt localoptions noshwordsplit
-
 	# Prevent percentage showing up if output doesn't end with a newline.
 	export PROMPT_EOL_MARK=$(pure_var_eol_mark)
 
@@ -88,8 +86,6 @@ prompt_pure_init_dependencies() {
 }
 
 prompt_pure_setup() {
-	setopt localoptions noshwordsplit
-
 	prompt_pure_init_dependencies
 
 	# Add command lifecycle hooks.
@@ -266,18 +262,33 @@ prompt_pure_vcs_prompt_render() {
 		vcs_prompt_parts+=('%F{red}(${prompt_pure_vcs_info[action]})%f')
 	fi
 
-	if [[ -n ${prompt_pure_vcs_info[stg_top]} ]]; then
-		stg_info='${prompt_pure_vcs_info[stg_top]}'
-		if [[ -n ${prompt_pure_vcs_info[stg_height]} ]]; then
-			stg_info+='#${prompt_pure_vcs_info[stg_height]}'
-		fi
-		vcs_prompt_parts+=("%f(${stg_info}})%f")
-	fi
+	local -a vcs_prompt_full
 
 	# Assembling and adding the VCS Prompt.
 	if [[ -n $vcs_prompt_parts ]]; then
-		echo '%f{'"${(j($(pure_var_vcs_prompt_delimiter)))vcs_prompt_parts}"'%f}'
+		vcs_prompt_full+='%f{'"${(j($(pure_var_vcs_prompt_delimiter)))vcs_prompt_parts}"'%f}'
 	fi
+
+	# Stacked Git Section.
+	if [[ -n ${prompt_pure_vcs_info[stg_top]} ]]; then
+		local status_color="green"
+		local -a stg_info
+
+		if [[ -n ${prompt_pure_vcs_info[stg_broken]} ]]; then
+			local status_color="red"
+		fi
+
+		if [[ -n ${prompt_pure_vcs_info[stg_stack_place]} ]]; then
+			stg_info=(
+				"%F{$git_color}"'stg%f'
+				"%F{$status_color}"'${prompt_pure_vcs_info[stg_top]}%f'
+				'${prompt_pure_vcs_info[stg_stack_place]}/${prompt_pure_vcs_info[stg_stack_total]}'
+			)
+		fi
+		vcs_prompt_full+='%f{'"${(j.:.)stg_info}"'%f}'
+	fi
+
+	echo "$vcs_prompt_full"
 }
 
 prompt_pure_preprompt_render() {
@@ -413,7 +424,6 @@ prompt_pure_precmd() {
 
 prompt_pure_async_callback() {
 	setopt localoptions noshwordsplit
-
 	local job=$1 code=$2 output=$3 exec_time=$4 next_pending=$6
 	local do_render=0
 
@@ -456,8 +466,11 @@ prompt_pure_async_callback() {
 			prompt_pure_vcs_info[branch]=$info[branch]
 			prompt_pure_vcs_info[action]=$info[action]
 			prompt_pure_vcs_info[top]=$info[top]
+
 			prompt_pure_vcs_info[stg_top]=$info[stg_top]
-			prompt_pure_vcs_info[stg_height]=$info[stg_height]
+			prompt_pure_vcs_info[stg_broken]=$info[stg_broken]
+			prompt_pure_vcs_info[stg_stack_place]=$info[stg_stack_place]
+			prompt_pure_vcs_info[stg_stack_total]=$info[stg_stack_total]
 
 			do_render=1
 			;;
@@ -555,7 +568,11 @@ prompt_pure_async_tasks() {
 		prompt_pure_vcs_info[action]=
 		prompt_pure_vcs_info[branch]=
 		prompt_pure_vcs_info[top]=
+
 		prompt_pure_vcs_info[stg_top]=
+		prompt_pure_vcs_info[stg_broken]=
+		prompt_pure_vcs_info[stg_stack_place]=
+		prompt_pure_vcs_info[stg_stack_total]=
 
 		prompt_pure_vcs_info[stash]=
 		prompt_pure_vcs_info[dirty]=
@@ -615,11 +632,19 @@ prompt_pure_async_vcs_info() {
 	info[vcs]=$vcs_info_msg_0_
 
 	if (( $+commands[stg] )); then
-		vcs_stg_top=$(stg top)
-		vcs_stg_height=$(stg series -A | wc -l | tr -d ' ')
+		info[stg_top]=$(stg top)
+		info[stg_stack_place]=$(stg series -A | wc -l | tr -d ' ')
+		info[stg_stack_total]=$(stg series | wc -l | tr -d ' ')
+
+		local stg_top_sha=$(stg id $(stg top))
+		local git_top_sha=$(git rev-parse HEAD)
+
+		if [[ $stg_top_sha != $git_top_sha ]]; then
+			info[stg_broken]="1 : s:${stg_top_sha} : g:${git_top_sha}"
+		else
+			info[stg_broken]=
+		fi
 	fi
-	info[stg_top]=$vcs_stg_top
-	info[stg_height]=$vcs_stg_height
 
 	print -r - ${(@kvq)info}
 }
