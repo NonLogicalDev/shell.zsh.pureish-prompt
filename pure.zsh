@@ -292,7 +292,7 @@ prompt_pure_vcs_prompt_render() {
 }
 
 prompt_pure_parent_process() {
-    ps -o command= -p $(ps -o ppid= -p $$) | sed 's/ .*$//'
+    basename "$(ps -o command= -p $(ps -o ppid= -p $$) | sed 's/ .*$//')"
 }
 
 prompt_pure_preprompt_render() {
@@ -314,11 +314,6 @@ prompt_pure_preprompt_render() {
         preprompt_parts+=($vcs_prompt)
     fi
 
-    # Adding Username and machine, if applicable.
-    if [[ -n $prompt_pure_state[username] ]]; then
-        preprompt_parts+=('${prompt_pure_state[username]}')
-    fi
-
     # Adding Execution time.
     if [[ -n $prompt_pure_cmd_exec_time ]]; then
       preprompt_parts+=('%F{yellow}${prompt_pure_cmd_exec_time}%f')
@@ -326,6 +321,11 @@ prompt_pure_preprompt_render() {
 
     # Adding Timestamp:
     preprompt_parts+=('%f[$(date +"%T %D")]%f')
+
+    # Adding Username and machine, if applicable.
+    if [[ -n $prompt_pure_state[username] ]]; then
+        preprompt_parts+=('${prompt_pure_state[username]}')
+    fi
 
     local cleaned_ps1=$PROMPT
     if [[ $PROMPT = *$prompt_newline* ]]; then
