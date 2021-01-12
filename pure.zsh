@@ -292,7 +292,7 @@ prompt_pure_vcs_prompt_render() {
 }
 
 prompt_pure_parent_process() {
-    ps -o command= -p $(ps -o ppid= -p $$)
+    ps -o command= -p $(ps -o ppid= -p $$) | sed 's/ .*$//'
 }
 
 prompt_pure_preprompt_render() {
