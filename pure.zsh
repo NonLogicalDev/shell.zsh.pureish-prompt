@@ -300,6 +300,7 @@ prompt_pure_preprompt_render() {
 
     # Initialize the preprompt array.
     local -a preprompt_parts
+    local -a preprompt_parts_extra
 
     preprompt_parts+=('($(prompt_pure_parent_process))')
 
@@ -309,10 +310,6 @@ prompt_pure_preprompt_render() {
     # Add current working dir:
     preprompt_parts+=('%F{yellow}(%F{blue}$(prompt_pure_shrink_path -f)%F{yellow})%f')
 
-    local vcs_prompt=$(prompt_pure_vcs_prompt_render)
-    if [[ -n $vcs_prompt ]]; then
-        preprompt_parts+=($vcs_prompt)
-    fi
 
     # Adding Execution time.
     if [[ -n $prompt_pure_cmd_exec_time ]]; then
@@ -334,9 +331,25 @@ prompt_pure_preprompt_render() {
         cleaned_ps1=${PROMPT##*${prompt_newline}}
     fi
 
+    # VCS Info:
+    local vcs_prompt=$(prompt_pure_vcs_prompt_render)
+    if [[ -n $vcs_prompt ]]; then
+        preprompt_parts_extra+=("$vcs_prompt")
+    fi
+
     # Construct the new prompt with a clean preprompt.
     local -ah ps1
-    ps1=(
+
+    if (( ${#preprompt_parts_extra[@]} )); then
+        ps1+=(
+            ":: "
+            "${(j.$(pure_var_prompt_delimiter).)preprompt_parts_extra}"
+            $prompt_newline
+        )
+    fi
+
+    ps1+=(
+        ":: "
         "%(?::%F{red}[%?] %f)"
         "${(j.$(pure_var_prompt_delimiter).)preprompt_parts}"  # Join parts, space separated.
         $prompt_newline           # Separate preprompt and prompt.
