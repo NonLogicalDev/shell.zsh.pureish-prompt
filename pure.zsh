@@ -371,6 +371,9 @@ prompt_pure_preprompt_render() {
     if [[ $1 == precmd ]]; then
         # Initial newline, for spaciousness.
         print
+        if (( $(echo -n "$expanded_prompt" | wc -l) < 1 )); then
+            print
+        fi
     elif [[ $prompt_pure_last_prompt != $expanded_prompt ]]; then
         # Redraw the prompt.
         zle && zle .reset-prompt
