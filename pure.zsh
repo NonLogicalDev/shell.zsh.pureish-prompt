@@ -51,7 +51,7 @@ pure_var_max_exec_time() {
 }
 
 pure_var_git_delay_dirty_check () {
-    echo ${PURE_GIT_DELAY_DIRTY_CHECK:-1800}
+    echo ${PURE_GIT_DELAY_DIRTY_CHECK:-18000}
 }
 
 # SETUP:
@@ -266,7 +266,7 @@ prompt_pure_vcs_prompt_render() {
 
     # Assembling and adding the VCS Prompt.
     if [[ -n $vcs_prompt_parts ]]; then
-        vcs_prompt_full+='%f{'"${(j($(pure_var_vcs_prompt_delimiter)))vcs_prompt_parts}"'%f}'
+        vcs_prompt_full+=('%f{'"${(j($(pure_var_vcs_prompt_delimiter)))vcs_prompt_parts}"'%f}')
     fi
 
     # Stacked Git Section.
@@ -275,17 +275,23 @@ prompt_pure_vcs_prompt_render() {
         local -a stg_info
 
         if [[ -n ${prompt_pure_vcs_info[stg_broken]} ]]; then
-            local status_color="red"
+            status_color="red"
+        fi
+
+        # Is repo dirty.
+        if [[ -n ${prompt_pure_vcs_info[dirty]} ]]; then
+            status_color="yellow"
         fi
 
         if [[ -n ${prompt_pure_vcs_info[stg_stack_place]} ]]; then
             stg_info=(
-                "%F{$git_color}"'stg%f'
+                # "%F{$git_color}"'stg%f'
+                "stg"
                 "%F{$status_color}"'${prompt_pure_vcs_info[stg_top]}%f'
                 '${prompt_pure_vcs_info[stg_stack_place]}/${prompt_pure_vcs_info[stg_stack_total]}'
             )
         fi
-        vcs_prompt_full+='%f{'"${(j.:.)stg_info}"'%f}'
+        vcs_prompt_full+=('%f{'"${(j.:.)stg_info}"'%f}')
     fi
 
     echo "$vcs_prompt_full"
@@ -619,7 +625,7 @@ prompt_pure_async_refresh() {
     if (( time_since_last_dirty_check > $(pure_var_git_delay_dirty_check) )); then
         unset prompt_pure_git_last_dirty_check_timestamp
         # check check if there is anything to pull
-        async_job "prompt_pure" prompt_pure_async_git_dirty ${PURE_GIT_UNTRACKED_DIRTY:1}
+        async_job "prompt_pure" prompt_pure_async_git_dirty ${PURE_GIT_UNTRACKED_DIRTY:0}
         async_job "prompt_pure" prompt_pure_async_git_stash
     fi
 }
