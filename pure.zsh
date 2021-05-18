@@ -109,6 +109,11 @@ prompt_pure_setup() {
     # prompt turns red if the previous command didn't exit with 0
     PROMPT+='%(?.%F{magenta}.%F{red})${prompt_pure_state[prompt]}%f '
 
+    prompt_pure_setup_trace_prompt
+
+    unset ZSH_THEME  # Guard against Oh My Zsh themes overriding Pure.
+}
+prompt_pure_setup_trace_prompt() {
     # Store prompt expansion symbols for in-place expansion via (%). For
     # some reason it does not work without storing them in a variable first.
     typeset -ga prompt_pure_debug_depth
@@ -120,6 +125,7 @@ prompt_pure_setup() {
     # information.
     local -A ps4_parts
     ps4_parts=(
+        timestamp '[%D{%s.%9.}]'
         depth 	  '%F{yellow}${(l:${(%)prompt_pure_debug_depth[1]}::+:)}%f'
         compare   '${${(%)prompt_pure_debug_depth[2]}:#${(%)prompt_pure_debug_depth[3]}}'
         main      '%F{blue}${${(%)prompt_pure_debug_depth[3]}:t}%f%F{242}:%I%f %F{242}@%f%F{blue}%N%f%F{242}:%i%f'
@@ -134,9 +140,7 @@ prompt_pure_setup() {
 
     # Improve the debug prompt (PS4), show depth by repeating the +-sign and
     # add colors to highlight essential parts like file and function name.
-    PROMPT4="${ps4_parts[depth]} ${ps4_symbols}${ps4_parts[prompt]}"
-
-    unset ZSH_THEME  # Guard against Oh My Zsh themes overriding Pure.
+    PROMPT4="${ps4_parts[timestamp]} ${ps4_parts[depth]} ${ps4_symbols}${ps4_parts[prompt]}"
 }
 
 prompt_pure_state_setup() {
@@ -371,9 +375,6 @@ prompt_pure_preprompt_render() {
     if [[ $1 == precmd ]]; then
         # Initial newline, for spaciousness.
         print
-        if (( $(echo -n "$expanded_prompt" | wc -l) < 1 )); then
-            print
-        fi
     elif [[ $prompt_pure_last_prompt != $expanded_prompt ]]; then
         # Redraw the prompt.
         zle && zle .reset-prompt
