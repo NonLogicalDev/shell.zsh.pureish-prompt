@@ -302,7 +302,7 @@ prompt_pure_vcs_prompt_render() {
 }
 
 prompt_pure_parent_process() {
-    basename "$(ps -o command= -p $(ps -o ppid= -p $$) | sed 's/ .*$//')"
+	basename "$(ps -o command= -p $(ps -o ppid= -p $$) | sed 's/ .*$//'| sed 's/^-*//')"
 }
 
 prompt_pure_preprompt_render() {
