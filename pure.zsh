@@ -637,6 +637,9 @@ prompt_pure_async_refresh() {
 
 prompt_pure_async_vcs_info() {
     setopt localoptions noshwordsplit
+    
+    # Make sure that read only git commands are not taking locks.
+    export GIT_OPTIONAL_LOCKS=0
 
     # configure vcs_info inside async task, this frees up vcs_info
     # to be used or configured as the user pleases.
@@ -645,10 +648,11 @@ prompt_pure_async_vcs_info() {
 
     # only export two msg variables from vcs_info
     zstyle ':vcs_info:*' max-exports 4
-    #
+    
     # export branch (%b) and git toplevel (%R)
     zstyle ':vcs_info:*' formats '%s' '%b' '%R'
     zstyle ':vcs_info:*' actionformats '%s' '%b' '%R' "%a"
+
 
     vcs_info
 
@@ -679,6 +683,9 @@ prompt_pure_async_vcs_info() {
 
 prompt_pure_async_vcs_stg_info() {
     local -A info
+    
+    # Make sure that read only git commands are not taking locks.
+    export GIT_OPTIONAL_LOCKS=0
 
     if (( ! $+commands[stg] )); then
         return
@@ -702,6 +709,9 @@ prompt_pure_async_vcs_stg_info() {
 
 prompt_pure_async_git_dirty() {
     setopt localoptions noshwordsplit
+    
+    # Make sure that read only git commands are not taking locks.
+    export GIT_OPTIONAL_LOCKS=0
 
     # fastest possible way to check if repo is dirty
     local untracked_dirty=$1
@@ -715,6 +725,9 @@ prompt_pure_async_git_dirty() {
 
 prompt_pure_async_git_stash() {
     setopt localoptions noshwordsplit
+    
+    # Make sure that read only git commands are not taking locks.
+    export GIT_OPTIONAL_LOCKS=0
 
     test -f "$(git rev-parse --show-toplevel)/.git/refs/stash"
     return $?
@@ -722,6 +735,9 @@ prompt_pure_async_git_stash() {
 
 prompt_pure_async_git_arrows() {
     setopt localoptions noshwordsplit
+    
+    # Make sure that read only git commands are not taking locks.
+    export GIT_OPTIONAL_LOCKS=0
 
     command git rev-list --left-right --count HEAD...@'{u}'
 }
