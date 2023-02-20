@@ -1,3 +1,9 @@
+# NOTICE: This project is outdated
+
+I have reimplemented this shell in GoLang, made it properly anynchroneous and non-blocking.
+
+Check out new blazing fast version here: https://github.com/NonLogicalDev/shell.async-goprompt
+
 # Pure:Ish
 
 > Sorta-pretty, kinda-minimal, but definitely fast and useful ZSH prompt.
